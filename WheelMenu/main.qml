@@ -11,10 +11,9 @@ ApplicationWindow {
 	// control part:
 	signal myButtonClicked
 	onMyButtonClicked: {
-		myButton.visible = ! myButton.visible
+		// @todo: add animation here or smth else
 		myPathView.visible = !myPathView.visible
 	}
-
 
 	// button in the bottom left corner
 	Rectangle {
@@ -28,6 +27,7 @@ ApplicationWindow {
 
 		x: 0
 		y: myMainWindow.height - height
+		z: 1
 
 		Image {
 			id: mButtonImage
@@ -36,7 +36,7 @@ ApplicationWindow {
 		}
 
 		MouseArea {
-			id: mouseArea
+			id: mMouseArea
 			anchors.fill: myButton
 
 			onClicked: {
@@ -51,33 +51,72 @@ ApplicationWindow {
 		id: myPathView
 		visible: false
 
-		width: parent.height / 2
-		height: parent.height / 2
+		width: parent.height
+		height: parent.height
 		anchors.margins: 0
 		anchors.fill: parent
-		model: ListModel {
-			ListElement { name: "element1" }
-			ListElement { name: "element2" }
-			ListElement { name: "element3" }
-			ListElement { name: "element4" }
-			ListElement { name: "element5" }
-			ListElement { name: "element6" }
-			ListElement { name: "element7" }
-			ListElement { name: "element8" }
-		}
+		model: myModel // imported from c++
 
 		delegate: Rectangle {
 			id : mDelegateRectangle
 			width: Math.min(parent.width, parent.height) / 6
 			height: width
-			radius: width / 2
+			radius: width * 0.3
+			border.color: "black"
+			border.width: 5
 			color: "blue"
+
+			onXChanged: {
+				// rotation center in (0, mwHeigth)
+				var xC = myPath.startX
+				var yC = myPath.startY
+				// only in visible quarter
+				var shift = width/2
+				if (x + shift> 0 && y - shift < yC) {
+					var deltaX = x + width/2 - xC
+					var deltaY = y + width/2 - yC
+					var angle = Math.atan2(deltaY, deltaX)
+					rotation = angle * 57.2958 + 90
+				}
+			}
+
+			property var modelDataArray: modelData.getList()
+
 			Text {
-				text: name
+				text: modelData.name
 				anchors.centerIn: parent
 				color: "#FFFFFF"
 				font.pointSize: parent.width / 3
+				transform: Translate { y: +20 ;}
+				MouseArea {
+					id: mListNameMouseArea
+					// do it for both items... inner and outer
+					anchors.fill: mDelegateRectangle
+
+					onClicked: {
+						console.log("clicked on inner Item")
+					}
+				}
 			}
+
+			Text {
+				text: modelDataArray[0]
+				anchors.centerIn: parent
+				color: "#FFFFFF"
+				font.pointSize: parent.width / 3
+				transform: Translate { y: -20}
+				MouseArea {
+					id: mLastSelectedItemMouseArea
+					// do it for both items... inner and outer
+					anchors.fill: mDelegateRectangle
+
+					onClicked: {
+						console.log("clicked on outer Item")
+					}
+				}
+			}
+
+
 		}
 
 		path: Path {
@@ -89,8 +128,8 @@ ApplicationWindow {
 				centerY: myPath.startY
 				radiusX: Math.min(myMainWindow.width, myMainWindow.height) / 3
 				radiusY: radiusX
-				startAngle: 0
-				sweepAngle: 360
+				startAngle: -180
+				sweepAngle: 270
 			}
 		}
 	}
