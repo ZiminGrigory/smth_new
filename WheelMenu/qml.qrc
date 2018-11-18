@@ -5,5 +5,6 @@
     </qresource>
     <qresource prefix="/images">
         <file>settings-button.svg</file>
+        <file>ribbon.svg</file>
     </qresource>
 </RCC>

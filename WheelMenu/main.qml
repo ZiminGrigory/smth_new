@@ -59,59 +59,74 @@ ApplicationWindow {
 
 		delegate: Rectangle {
 			id : mDelegateRectangle
-			width: Math.min(parent.width, parent.height) / 6
+			width: Math.min(parent.width, parent.height) / 4
 			height: width
-			radius: width * 0.3
-			border.color: "black"
-			border.width: 5
-			color: "blue"
 
-			onXChanged: {
+			function rotate(item) {
 				// rotation center in (0, mwHeigth)
 				var xC = myPath.startX
 				var yC = myPath.startY
 				// only in visible quarter
 				var shift = width/2
-				if (x + shift> 0 && y - shift < yC) {
-					var deltaX = x + width/2 - xC
-					var deltaY = y + width/2 - yC
+				if (item.x + shift> 0 && item.y - shift < yC) {
+					var deltaX = item.x + width/2 - xC
+					var deltaY = item.y + width/2 - yC
 					var angle = Math.atan2(deltaY, deltaX)
-					rotation = angle * 57.2958 + 90
+					item.rotation = angle * 57.2958 + 90
 				}
 			}
 
+			onXChanged: {
+				rotate(mDelegateRectangle)
+			}
+
+			onVisibleChanged: {
+				rotate(mDelegateRectangle)
+			}
+
 			property var modelDataArray: modelData.getList()
+			property int currentSelectedItem: 0
+
+			Image {
+				id: mInnerImage
+				source: "qrc:/images/ribbon.svg"
+				anchors.fill: parent
+			}
 
 			Text {
-				text: modelData.name
-				anchors.centerIn: parent
-				color: "#FFFFFF"
-				font.pointSize: parent.width / 3
-				transform: Translate { y: +20 ;}
-				MouseArea {
-					id: mListNameMouseArea
-					// do it for both items... inner and outer
-					anchors.fill: mDelegateRectangle
+				height: mDelegateRectangle.height / 9 * 3
+				width: mDelegateRectangle.width
+				text: modelDataArray[currentSelectedItem]
 
+				anchors.top: parent.top
+				anchors.margins: mDelegateRectangle.height / 9
+				horizontalAlignment: Text.AlignHCenter
+				color: "#000000"
+				font.pointSize: parent.width / 4
+				MouseArea {
+					id: mLastSelectedItemMouseArea
+					anchors.fill: parent
 					onClicked: {
-						console.log("clicked on inner Item")
+						console.log("clicked on outer Item")
+						currentSelectedItem = (currentSelectedItem + 1) % modelDataArray.length
 					}
 				}
 			}
 
 			Text {
-				text: modelDataArray[0]
-				anchors.centerIn: parent
-				color: "#FFFFFF"
-				font.pointSize: parent.width / 3
-				transform: Translate { y: -20}
+				height: mDelegateRectangle.height / 9 * 3
+				width: mDelegateRectangle.width
+				text: "<b>" + modelData.name + "</b>"
+				anchors.top: parent.verticalCenter
+				horizontalAlignment: Text.AlignHCenter
+				anchors.margins: mDelegateRectangle.height / 9
+				color: "#000000"
+				font.pointSize: parent.width / 4
 				MouseArea {
-					id: mLastSelectedItemMouseArea
-					// do it for both items... inner and outer
-					anchors.fill: mDelegateRectangle
-
+					id: mListNameMouseArea
+					anchors.fill: parent
 					onClicked: {
-						console.log("clicked on outer Item")
+						console.log("clicked on inner Item")
 					}
 				}
 			}
@@ -126,7 +141,7 @@ ApplicationWindow {
 			PathAngleArc {
 				centerX: 0
 				centerY: myPath.startY
-				radiusX: Math.min(myMainWindow.width, myMainWindow.height) / 3
+				radiusX: Math.min(myMainWindow.width, myMainWindow.height) / 2.2
 				radiusY: radiusX
 				startAngle: -180
 				sweepAngle: 270
