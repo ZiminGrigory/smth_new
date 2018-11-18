@@ -216,16 +216,15 @@ ApplicationWindow {
 				}
 			}
 
-			Text {
-				id: myInnerText
+			Rectangle {
+				id: myInnerObject
 				height: mDelegateRectangle.height / 9 * 3
-				width: mDelegateRectangle.width
-				text: "<b>LIST</b>"
+				width: mDelegateRectangle.width * 0.5
+				radius: width * 0.2
 				anchors.top: parent.verticalCenter
-				horizontalAlignment: Text.AlignHCenter
+				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.margins: mDelegateRectangle.height / 9
 				color: modelData.color
-				font.pointSize: parent.width / 4
 				MouseArea {
 					id: mListNameMouseArea
 					anchors.fill: parent
@@ -270,7 +269,7 @@ ApplicationWindow {
 				property: "radiusX"
 				from: 0
 				to: myPathAngleArc.radiusX
-				duration: 700
+				duration: 300
 			}
 
 			NumberAnimation {
@@ -278,7 +277,7 @@ ApplicationWindow {
 				property: "opacity"
 				from: 0.0
 				to: 1.0
-				duration: 500
+				duration: 200
 			}
 
 		}
