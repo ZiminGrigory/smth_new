@@ -12,7 +12,12 @@ ApplicationWindow {
 	signal myButtonClicked
 	onMyButtonClicked: {
 		// @todo: add animation here or smth else
-		myPathView.visible = !myPathView.visible
+		if (!myPathView.visible) {
+			myPathView.visible = !myPathView.visible
+			myPathViewShowAnimation.start()
+		} else {
+			myPathView.visible = !myPathView.visible
+		}
 	}
 
 	// model as array too for decreasing memory allocations
@@ -23,13 +28,15 @@ ApplicationWindow {
 		myMainListViewTable.currentIndex = modelObj.selectedItem
 		myMainListViewTable.visible = true
 		myMainViewItem.visible = false
+		myMainViewStart.visible = false
 	}
 
 	signal myShowSelectedItemInTable(var modelObj)
 	onMyShowSelectedItemInTable: {
 		myMainViewItem.myCurrentModel = modelObj
-		myMainListViewTable.visible = false
 		myMainViewItem.visible = true
+		myMainListViewTable.visible = false
+		myMainViewStart.visible = false
 	}
 
 	// mainWidgets:
@@ -70,6 +77,8 @@ ApplicationWindow {
 			radius: parent.height * 0.5
 		}
 
+		highlightMoveDuration: 250
+
 		// background
 		Rectangle {
 			z: -10
@@ -105,12 +114,30 @@ ApplicationWindow {
 		}
 	}
 
+	Item {
+		id: myMainViewStart
+		anchors.fill: parent
+		anchors.margins: 20
+
+		Text {
+			anchors.centerIn: parent
+			text: 'Wheel Menu'
+			font.pixelSize: Math.min(parent.height, parent.width) * 0.1
+		}
+
+		//background
+		Rectangle {
+			z: -10
+			anchors.fill: parent
+			color: "lightsteelblue"
+			opacity: 0.6
+			radius: parent.height * 0.05
+		}
+	}
+
 
 	// button in the bottom left corner
 	Rectangle {
-		signal clicked
-		onClicked: myMainWindow.myButtonClicked()
-
 		id: myButton
 		width: Math.min(myMainWindow.width, myMainWindow.height) / 10
 		height: width
@@ -131,8 +158,7 @@ ApplicationWindow {
 			anchors.fill: myButton
 
 			onClicked: {
-				console.log("clicked")
-				myButton.clicked()
+				myMainWindow.myButtonClicked()
 			}
 		}
 	}
@@ -148,10 +174,6 @@ ApplicationWindow {
 		anchors.margins: 0
 		anchors.fill: parent
 		model: myModel // imported from c++
-
-		signal closeMe
-		// todo add animation
-		onCloseMe: visible = !visible
 
 		delegate: Rectangle {
 			id : mDelegateRectangle
@@ -173,9 +195,6 @@ ApplicationWindow {
 
 			readonly property var modelDataArray: modelData.getList()
 
-			signal itemClicked
-			onItemClicked: parent.closeMe()
-
 			Text {
 				id: myOuterText
 				height: mDelegateRectangle.height / 9 * 3
@@ -185,15 +204,14 @@ ApplicationWindow {
 				anchors.top: parent.top
 				anchors.margins: mDelegateRectangle.height / 9
 				horizontalAlignment: Text.AlignHCenter
-				color: "#000000"
+				color: "white"
 				font.pointSize: parent.width / 4
 				MouseArea {
 					id: mLastSelectedItemMouseArea
 					anchors.fill: parent
 					onClicked: {
-						mDelegateRectangle.itemClicked()
+						myMainWindow.myButtonClicked()
 						myMainWindow.myShowSelectedItemInTable(modelData)
-						console.log("clicked on outer Item")
 					}
 				}
 			}
@@ -212,9 +230,9 @@ ApplicationWindow {
 					id: mListNameMouseArea
 					anchors.fill: parent
 					onClicked: {
+						myMainWindow.myButtonClicked()
 						myMainListViewTable.currentIndex = index
 						myMainWindow.myShowTableContent(modelData, mDelegateRectangle.modelDataArray)
-						mDelegateRectangle.itemClicked()
 					}
 				}
 			}
@@ -243,6 +261,26 @@ ApplicationWindow {
 			z: -1
 			x: -width / 2
 			y: myMainWindow.height - width / 2;
+		}
+
+		ParallelAnimation {
+			id: myPathViewShowAnimation
+			NumberAnimation {
+				target: myPathAngleArc
+				property: "radiusX"
+				from: 0
+				to: myPathAngleArc.radiusX
+				duration: 700
+			}
+
+			NumberAnimation {
+				target: myPathView
+				property: "opacity"
+				from: 0.0
+				to: 1.0
+				duration: 500
+			}
+
 		}
 	}
 }
