@@ -74,7 +74,7 @@ ApplicationWindow {
 		delegate: myDataDelegate
 		highlight: Rectangle {
 			color: "lightsteelblue"
-			radius: parent.height * 0.5
+			radius: myMainListViewTable.height * 0.5
 		}
 
 		highlightMoveDuration: 250
@@ -83,7 +83,9 @@ ApplicationWindow {
 		Rectangle {
 			z: -10
 			anchors.fill: parent
-			color: myMainListViewTable.myCurrentModel.color
+			color: {
+				myMainListViewTable.myCurrentModel ? myMainListViewTable.myCurrentModel.color : "white"
+			}
 			opacity: 0.6
 			radius: parent.height * 0.01
 		}
@@ -99,7 +101,11 @@ ApplicationWindow {
 
 		Text {
 			anchors.centerIn: parent
-			text: '<b>Value:</b> ' + (myMainViewItem.myCurrentModel.selectedItem + 1)
+			text: {
+				var str = '<b>Value:</b> '
+				var index = myMainViewItem.myCurrentModel ? myMainViewItem.myCurrentModel.selectedItem + 1 : 0
+				str + index
+			}
 			font.pixelSize: Math.min(parent.height, parent.width) * 0.1
 		}
 
@@ -108,7 +114,13 @@ ApplicationWindow {
 			z: -10
 			anchors.fill: parent
 			// set color accroding to base table
-			color: myMainViewItem.myCurrentModel.color
+			color: {
+				var colorObj = null
+				if (myMainViewItem.myCurrentModel) {
+					colorObj = myMainViewItem.myCurrentModel.color
+				}
+				colorObj ? colorObj : "white"
+			}
 			opacity: 0.6
 			radius: parent.height * 0.05
 		}
@@ -208,7 +220,7 @@ ApplicationWindow {
 				anchors.margins: mDelegateRectangle.height / 9
 				horizontalAlignment: Text.AlignHCenter
 				color: "white"
-				font.pointSize: parent.width / 4
+				font.pointSize: {var size = parent.width / 4; size > 0 ? size : 10}
 				MouseArea {
 					id: mLastSelectedItemMouseArea
 					anchors.fill: parent
