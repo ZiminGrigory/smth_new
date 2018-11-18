@@ -5,7 +5,7 @@
 class ListWrapper : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(QString color READ listColor)
+	Q_PROPERTY(QString color READ listColor CONSTANT)
 	Q_PROPERTY(int selectedItem READ currentItem WRITE selectItem NOTIFY currentItemChanged)
 public:
 	explicit ListWrapper(QObject *parent = nullptr);
