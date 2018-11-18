@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QGuiApplication app(argc, argv);
 
-	qmlRegisterType<ListWrapper>("org.myModels", 1, 0, "SimpleListModel");
 	auto clean = [](const QList<QObject *> &model) {
 		for (auto list : model) {
 			delete list;

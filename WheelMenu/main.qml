@@ -84,7 +84,7 @@ ApplicationWindow {
 			z: -10
 			anchors.fill: parent
 			color: myMainListViewTable.myCurrentModel.color
-			opacity: 0.3
+			opacity: 0.6
 			radius: parent.height * 0.01
 		}
 	}
@@ -109,7 +109,7 @@ ApplicationWindow {
 			anchors.fill: parent
 			// set color accroding to base table
 			color: myMainViewItem.myCurrentModel.color
-			opacity: 0.3
+			opacity: 0.6
 			radius: parent.height * 0.05
 		}
 	}
@@ -130,7 +130,6 @@ ApplicationWindow {
 			z: -10
 			anchors.fill: parent
 			color: "lightsteelblue"
-			opacity: 0.6
 			radius: parent.height * 0.05
 		}
 	}
@@ -150,6 +149,9 @@ ApplicationWindow {
 		Image {
 			id: mButtonImage
 			source: "qrc:/images/settings-button.svg"
+			// rendering without sourceSise is awful
+			sourceSize.width: parent.width
+			sourceSize.height: parent.width
 			anchors.fill: parent
 		}
 
@@ -181,17 +183,18 @@ ApplicationWindow {
 			height: width
 			color: "transparent"
 
-			function rotate(item) {
+			function rotate(item, nonrotatingChild) {
 				var xC = myPath.startX
 				var yC = myPath.startY
 				var deltaX = item.x + width/2 - xC
 				var deltaY = item.y + width/2 - yC
 				var angle = Math.atan2(deltaY, deltaX)
 				item.rotation = angle * 57.2958 + 90
+				nonrotatingChild.rotation = -item.rotation;
 			}
 
-			onXChanged: rotate(mDelegateRectangle)
-			onVisibleChanged: rotate(mDelegateRectangle)
+			onXChanged: rotate(mDelegateRectangle, myOuterText)
+			onVisibleChanged: rotate(mDelegateRectangle, myOuterText)
 
 			readonly property var modelDataArray: modelData.getList()
 
@@ -254,8 +257,8 @@ ApplicationWindow {
 
 		Image {
 			id: mPathViewImage
-			width: Math.min(myMainWindow.width, myMainWindow.height) / 0.7
-			height: width
+			sourceSize.width: Math.min(myMainWindow.width, myMainWindow.height) / 0.7
+			sourceSize.height: sourceSize.height
 			source: "qrc:/images/circle.svg"
 			z: -1
 			x: -width / 2
@@ -277,9 +280,8 @@ ApplicationWindow {
 				property: "opacity"
 				from: 0.0
 				to: 1.0
-				duration: 200
+				duration: 300
 			}
-
 		}
 	}
 }
