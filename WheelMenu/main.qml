@@ -15,35 +15,32 @@ ApplicationWindow {
 		myPathView.visible = !myPathView.visible
 	}
 
-	signal myShowContent(var model, bool innerElement, int currentInnerIndex, string baseColor)
-	onMyShowContent: {
-		console.log("MODEL: ", model, "is Inner: ", innerElement, "index = ", currentInnerIndex, "color= ", baseColor)
+	// model as array too for decreasing memory allocations
+	signal myShowTableContent(var modelObj, var model)
+	onMyShowTableContent: {
+		myMainListViewTable.myCurrentModel = modelObj
 		myMainListViewTable.model = model
-		myMainListViewTable.innerElement = innerElement
-		myMainListViewTable.color = baseColor
+		myMainListViewTable.currentIndex = modelObj.selectedItem
 		myMainListViewTable.visible = true
+		myMainViewItem.visible = false
 	}
 
-	signal myUpdateWheelItem(int selectedOuterIndex)
-	onMyUpdateWheelItem: {
-		myPathView.currentItem.currentSelectedItem = selectedOuterIndex
+	signal myShowSelectedItemInTable(var modelObj)
+	onMyShowSelectedItemInTable: {
+		myMainViewItem.myCurrentModel = modelObj
+		myMainListViewTable.visible = false
+		myMainViewItem.visible = true
 	}
 
 	// mainWidgets:
-	// List view for table... and for selected Item in table too
+	// List view for table
 	ListView
 	{
 		id: myMainListViewTable
 		visible: false
 		anchors.fill: parent
 		anchors.margins: 20
-		property bool innerElement: false
-		property string color: ""
-
-		signal itemSelected(bool innerElement, int index)
-		onItemSelected: {
-
-		}
+		property variant myCurrentModel
 
 		Component {
 			id: myDataDelegate
@@ -61,10 +58,7 @@ ApplicationWindow {
 					anchors.fill: parent
 					onClicked: {
 						myMainListViewTable.currentIndex = index
-						myMainListViewTable.itemSelected(myMainListViewTable.innerElement, index)
-						if (myMainListViewTable.innerElement) {
-							myMainWindow.myUpdateWheelItem(index)
-						}
+						myMainListViewTable.myCurrentModel.selectedItem = index
 					}
 				}
 			}
@@ -80,12 +74,35 @@ ApplicationWindow {
 		Rectangle {
 			z: -10
 			anchors.fill: parent
-			color: parent.color
+			color: myMainListViewTable.myCurrentModel.color
+			opacity: 0.3
+			radius: parent.height * 0.01
+		}
+	}
+
+	Item {
+		id: myMainViewItem
+
+		visible: false
+		anchors.fill: parent
+		anchors.margins: 20
+		property variant myCurrentModel
+
+		Text {
+			anchors.centerIn: parent
+			text: '<b>Value:</b> ' + (myMainViewItem.myCurrentModel.selectedItem + 1)
+			font.pixelSize: Math.min(parent.height, parent.width) * 0.1
+		}
+
+		//background
+		Rectangle {
+			z: -10
+			anchors.fill: parent
+			// set color accroding to base table
+			color: myMainViewItem.myCurrentModel.color
 			opacity: 0.3
 			radius: parent.height * 0.05
 		}
-
-		highlightFollowsCurrentItem: innerElement
 	}
 
 
@@ -155,7 +172,6 @@ ApplicationWindow {
 			onVisibleChanged: rotate(mDelegateRectangle)
 
 			readonly property var modelDataArray: modelData.getList()
-			property int currentSelectedItem: 0
 
 			signal itemClicked
 			onItemClicked: parent.closeMe()
@@ -164,7 +180,7 @@ ApplicationWindow {
 				id: myOuterText
 				height: mDelegateRectangle.height / 9 * 3
 				width: mDelegateRectangle.width
-				text: modelDataArray[currentSelectedItem % 7]
+				text: "item: " + (modelData.selectedItem + 1)
 
 				anchors.top: parent.top
 				anchors.margins: mDelegateRectangle.height / 9
@@ -176,8 +192,8 @@ ApplicationWindow {
 					anchors.fill: parent
 					onClicked: {
 						mDelegateRectangle.itemClicked()
+						myMainWindow.myShowSelectedItemInTable(modelData)
 						console.log("clicked on outer Item")
-						currentSelectedItem = (currentSelectedItem + 1) % modelDataArray.length
 					}
 				}
 			}
@@ -197,13 +213,8 @@ ApplicationWindow {
 					anchors.fill: parent
 					onClicked: {
 						myMainListViewTable.currentIndex = index
-						myMainWindow.myShowContent(
-								mDelegateRectangle.modelDataArray
-								, true
-								, mDelegateRectangle.currentSelectedItem
-								, parent.color)
+						myMainWindow.myShowTableContent(modelData, mDelegateRectangle.modelDataArray)
 						mDelegateRectangle.itemClicked()
-						console.log("clicked on inner Item")
 					}
 				}
 			}
