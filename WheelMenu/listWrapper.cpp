@@ -8,18 +8,13 @@ ListWrapper::ListWrapper(QObject *parent)
 ListWrapper::ListWrapper(const QStringList &data, const QString &name, QObject *parent)
 	: QObject(parent)
 	, mList(data)
-	, mListName(name)
+	, mListColor(name)
 {
 }
 
-QString ListWrapper::listName() const
+QString ListWrapper::listColor() const
 {
-	return mListName;
-}
-
-void ListWrapper::setListName(const QString &name)
-{
-	mListName = name;
+	return mListColor;
 }
 
 QStringList ListWrapper::getList() const

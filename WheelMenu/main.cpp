@@ -24,9 +24,11 @@ int main(int argc, char *argv[])
 	// But it's still not a vector
 	// And we still need some "list" inherited from QObject ...
 	QList<QObject*> model;
+
+	auto colors = QStringList{"red", "orange", "yellow", "green", "lightblue", "blue", "purple"};
 	model.reserve(7);
 	for (int i = 0; i < 7; ++i) {
-		model.append(new ListWrapper({"1", "2", "3", "4"}, QString("list %1").arg(i)));
+		model.append(new ListWrapper({"1", "2", "3", "4"}, colors[i]));
 	}
 
 	QQmlApplicationEngine engine;
